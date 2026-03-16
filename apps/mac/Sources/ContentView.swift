@@ -302,18 +302,30 @@ struct ContentView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 10)
             
-            Button(action: {
-                manager.pauseForWellness()
-            }) {
-                Text("Pause & Relax")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color.black)
-                    .cornerRadius(8)
+            VStack(spacing: 12) {
+                Button(action: {
+                    manager.pauseForWellness()
+                }) {
+                    Text("Pause & Relax")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.black)
+                        .cornerRadius(8)
+                }
+                .buttonStyle(.plain)
+                
+                Button(action: {
+                    manager.continueWorking()
+                }) {
+                    Text("Continue working")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(Color(hexString: "#aaaaaa"))
+                        .underline()
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
         .padding(.vertical, 20)
     }

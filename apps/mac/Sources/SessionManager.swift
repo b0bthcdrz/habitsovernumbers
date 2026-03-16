@@ -161,6 +161,12 @@ class SessionManager: ObservableObject {
     
     func pauseForWellness() {
         isPaused = true
+        isWellnessBreak = false
+        wellnessSeconds = 0 // Reset counter for next 20 mins
+    }
+    
+    func continueWorking() {
+        isWellnessBreak = false
         wellnessSeconds = 0 // Reset counter for next 20 mins
     }
     
