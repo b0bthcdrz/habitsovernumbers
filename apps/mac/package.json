@@ -1,0 +1,9 @@
+{
+  "name": "mac-app",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "build": "make",
+    "clean": "make clean"
+  }
+}
