@@ -66,14 +66,26 @@ class SessionManager: ObservableObject {
     private func checkSystemState() {
         let secondsSinceLastEvent = CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: .null)
         
+        // Debug logging to help identify why it thinks the user is inactive
+        #if DEBUG
+        if secondsSinceLastEvent > 10 {
+            print("Idle check: secondsSinceLastEvent = \(secondsSinceLastEvent)")
+        }
+        #endif
+
+        // A very large value (like 2^32 or similar) usually means the system call failed or permissions are missing.
+        // We ignore values that are physically impossible for a single session.
+        let isReasonableValue = secondsSinceLastEvent < 100_000 
+        
         if isRunning && !isPaused {
             // While running: Check for sudden idleness (5 mins)
-            if secondsSinceLastEvent > idleThreshold && !isIdleConfirmation {
+            if isReasonableValue && secondsSinceLastEvent > idleThreshold && !isIdleConfirmation {
+                print("Triggering idle confirmation: idle for \(secondsSinceLastEvent)s")
                 triggerIdleConfirmation()
             }
         } else if !isRunning {
             // While idle: Active Recall logic
-            if secondsSinceLastEvent > idleThreshold {
+            if isReasonableValue && secondsSinceLastEvent > idleThreshold {
                 wasIdle = true
                 detectedStartTime = nil
             } else if wasIdle && secondsSinceLastEvent < 5 {

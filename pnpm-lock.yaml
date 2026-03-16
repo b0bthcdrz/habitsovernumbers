@@ -22,9 +22,9 @@ importers:
 
   apps/web:
     dependencies:
-      '@supabase/auth-helpers-nextjs':
-        specifier: ^0.15.0
-        version: 0.15.0(@supabase/supabase-js@2.99.1)
+      '@supabase/ssr':
+        specifier: ^0.9.0
+        version: 0.9.0(@supabase/supabase-js@2.99.1)
       '@supabase/supabase-js':
         specifier: ^2.99.1
         version: 2.99.1
@@ -929,16 +929,6 @@ packages:
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
     dev: true
 
-  /@supabase/auth-helpers-nextjs@0.15.0(@supabase/supabase-js@2.99.1):
-    resolution: {integrity: sha512-VtXz3GGnxluoxks1g3SaCoYr2OZ7PgRukDl+pLWrDfD2dPDaG8hmkp5iBZsU+lmsDYALGNO2dgbymgpAfD8eCQ==}
-    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
-    peerDependencies:
-      '@supabase/supabase-js': ^2.76.1
-    dependencies:
-      '@supabase/supabase-js': 2.99.1
-      cookie: 1.1.1
-    dev: false
-
   /@supabase/auth-js@2.99.1:
     resolution: {integrity: sha512-x7lKKTvKjABJt/FYcRSPiTT01Xhm2FF8RhfL8+RHMkmlwmRQ88/lREupIHKwFPW0W6pTCJqkZb7Yhpw/EZ+fNw==}
     engines: {node: '>=20.0.0'}
@@ -971,6 +961,15 @@ packages:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+    dev: false
+
+  /@supabase/ssr@0.9.0(@supabase/supabase-js@2.99.1):
+    resolution: {integrity: sha512-UFY6otYV3yqCgV+AyHj80vNkTvbf1Gas2LW4dpbQ4ap6p6v3eB2oaDfcI99jsuJzwVBCFU4BJI+oDYyhNk1z0Q==}
+    peerDependencies:
+      '@supabase/supabase-js': ^2.97.0
+    dependencies:
+      '@supabase/supabase-js': 2.99.1
+      cookie: 1.1.1
     dev: false
 
   /@supabase/storage-js@2.99.1:

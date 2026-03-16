@@ -1,4 +1,10 @@
-export default function Home() {
+import { createClient } from '@/utils/supabase/server'
+import { signInWithGoogle, signOut } from './auth/actions'
+
+export default async function Home() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
   return (
     <div className="min-h-screen bg-white text-black font-sans flex flex-col items-center justify-center p-8">
       <header className="max-w-md w-full flex justify-between items-center mb-16">
@@ -6,7 +12,13 @@ export default function Home() {
         <nav className="flex gap-4 text-xs text-[#aaaaaa]">
           <a href="#" className="hover:text-black">Features</a>
           <a href="#" className="hover:text-black">Pricing</a>
-          <a href="#" className="hover:text-black">Login</a>
+          {user ? (
+            <form action={signOut}>
+              <button type="submit" className="hover:text-black">Logout</button>
+            </form>
+          ) : (
+            <a href="#" className="hover:text-black">Login</a>
+          )}
         </nav>
       </header>
 
@@ -21,9 +33,21 @@ export default function Home() {
           <button className="w-full bg-[#111111] text-white py-3 rounded-lg text-sm hover:bg-[#222222] transition-colors">
             Download for macOS
           </button>
-          <button className="w-full border border-[#d0d0d0] text-black py-3 rounded-lg text-sm hover:bg-[#f5f5f5] transition-colors">
-            Continue with Google
-          </button>
+          
+          {user ? (
+            <div className="text-sm text-[#A07840] font-medium py-3">
+              Welcome back, {user.email}
+            </div>
+          ) : (
+            <form action={signInWithGoogle}>
+              <button 
+                type="submit"
+                className="w-full border border-[#d0d0d0] text-black py-3 rounded-lg text-sm hover:bg-[#f5f5f5] transition-colors"
+              >
+                Continue with Google
+              </button>
+            </form>
+          )}
         </div>
       </main>
 

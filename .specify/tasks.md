@@ -14,8 +14,9 @@
 - [x] T2.4: Initialize Git repository and `changesets` for semantic versioning.
 - [x] T2.5: Design minimalist grayscale landing page for `apps/web`.
 
-## [ ] Phase 3: Subscription & Sync Integration
-- [ ] T3.1: Configure Supabase Auth (Google Login) in `apps/web`.
-- [ ] T3.2: Setup Stripe subscription flow in `apps/web`.
+## [ ] Phase 3: Sync & Refining
+- [x] T3.1: Configure Supabase Auth (Google Login) in `apps/web`.
+- [x] T3.2: Bugfix: Prevent false idle detection in `apps/mac` (added safety checks).
 - [ ] T3.3: Implement secure API for syncing local sessions to Supabase.
 - [ ] T3.4: Integrate web auth token into `apps/mac` for optional cloud sync.
+- [ ] (DEFERRED) T3.5: Setup Stripe subscription flow in `apps/web`.
