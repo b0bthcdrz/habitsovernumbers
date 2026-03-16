@@ -3,6 +3,7 @@ import Cocoa
 import Combine
 import UniformTypeIdentifiers
 import Quartz
+import IOKit
 
 struct Session: Identifiable, Codable {
     let id: UUID
@@ -63,24 +64,42 @@ class SessionManager: ObservableObject {
         }
     }
     
-    private func checkSystemState() {
-        let secondsSinceLastEvent = CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: .null)
+    private func getSystemIdleTime() -> TimeInterval {
+        var iterator: io_iterator_t = 0
+        let result = IOServiceGetMatchingServices(kIOMasterPortDefault, IOServiceMatching("IOHIDSystem"), &iterator)
+        if result != kIOReturnSuccess { return 0 }
         
-        // Debug logging to help identify why it thinks the user is inactive
-        #if DEBUG
+        defer { IOObjectRelease(iterator) }
+        let entry = IOIteratorNext(iterator)
+        if entry == 0 { return 0 }
+        
+        defer { IOObjectRelease(entry) }
+        var dict: Unmanaged<CFMutableDictionary>?
+        let dictResult = IORegistryEntryCreateCFProperties(entry, &dict, kCFAllocatorDefault, 0)
+        
+        if dictResult != kIOReturnSuccess { return 0 }
+        let properties = dict?.takeRetainedValue() as? [String: Any]
+        let idleTimeNano = properties?["HIDIdleTime"] as? Int64 ?? 0
+        
+        return TimeInterval(idleTimeNano) / 1_000_000_000.0
+    }
+    
+    private func checkSystemState() {
+        let secondsSinceLastEvent = getSystemIdleTime()
+        
+        // Debug logging enabled by default to help diagnosis
         if secondsSinceLastEvent > 10 {
-            print("Idle check: secondsSinceLastEvent = \(secondsSinceLastEvent)")
+            print("Idle check: secondsSinceLastEvent = \(Int(secondsSinceLastEvent))s")
         }
-        #endif
 
         // A very large value (like 2^32 or similar) usually means the system call failed or permissions are missing.
-        // We ignore values that are physically impossible for a single session.
-        let isReasonableValue = secondsSinceLastEvent < 100_000 
+        // We ignore values that are physically impossible for a single session ( > 24 hours).
+        let isReasonableValue = secondsSinceLastEvent < 86_400 
         
         if isRunning && !isPaused {
             // While running: Check for sudden idleness (5 mins)
             if isReasonableValue && secondsSinceLastEvent > idleThreshold && !isIdleConfirmation {
-                print("Triggering idle confirmation: idle for \(secondsSinceLastEvent)s")
+                print("Triggering idle confirmation: idle for \(Int(secondsSinceLastEvent))s")
                 triggerIdleConfirmation()
             }
         } else if !isRunning {
