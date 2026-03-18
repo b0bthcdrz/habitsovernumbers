@@ -239,28 +239,30 @@ struct ContentView: View {
                 .foregroundColor(Color.black)
                 .frame(maxWidth: .infinity, alignment: .center)
             
-            Button(action: {
-                manager.stop()
-            }) {
-                Text("Stop")
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(Color(hexString: "#111111"))
-                    .cornerRadius(8)
+            VStack(spacing: 8) {
+                Button(action: {
+                    manager.startManualBreak()
+                }) {
+                    Text("Take a Break")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color(hexString: "#111111"))
+                        .cornerRadius(8)
+                }
+                .buttonStyle(.plain)
+                
+                Button(action: {
+                    manager.stop()
+                }) {
+                    Text("Stop Session")
+                        .font(.system(size: 11, weight: .regular))
+                        .foregroundColor(Color(hexString: "#aaaaaa"))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
-            
-            Button(action: {
-                manager.startManualBreak()
-            }) {
-                Text("Take a Break")
-                    .font(.system(size: 11, weight: .regular))
-                    .foregroundColor(Color(hexString: "#aaaaaa"))
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.plain)
         }
     }
     
