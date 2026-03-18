@@ -251,6 +251,16 @@ struct ContentView: View {
                     .cornerRadius(8)
             }
             .buttonStyle(.plain)
+            
+            Button(action: {
+                manager.startManualBreak()
+            }) {
+                Text("Take a Break")
+                    .font(.system(size: 11, weight: .regular))
+                    .foregroundColor(Color(hexString: "#aaaaaa"))
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.plain)
         }
     }
     

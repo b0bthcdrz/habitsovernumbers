@@ -159,6 +159,12 @@ class SessionManager: ObservableObject {
         onPanelAction?()
     }
     
+    func startManualBreak() {
+        isPaused = true
+        isWellnessBreak = false
+        wellnessSeconds = 0
+    }
+    
     func pauseForWellness() {
         isPaused = true
         isWellnessBreak = false
