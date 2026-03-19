@@ -1,0 +1,45 @@
+<Application x:Class="HON.Windows.App"
+             xmlns="http://schemas.microsoft.com/winfx/2000/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2000/xaml"
+             xmlns:tb="http://www.hardcodet.net/shell"
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+        <ResourceDictionary>
+            <!-- HON Design Styles -->
+            <Color x:Key="HoneyGold">#A07840</Color>
+            <Color x:Key="Ink">#1C1812</Color>
+            <Color x:Key="SoftInk">#6B6456</Color>
+            <Color x:Key="WarmPaper">#F5F0E8</Color>
+
+            <Style x:Key="PrimaryButton" TargetType="Button">
+                <Setter Property="Background" Value="#111111"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Padding" Value="0,10"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="LinkButton" TargetType="Button">
+                <Setter Property="Foreground" Value="#aaaaaa"/>
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <TextBlock Text="{TemplateBinding Content}" TextDecorations="Underline" HorizontalAlignment="Center"/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

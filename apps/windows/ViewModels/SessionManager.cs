@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Timers;
+using System.Windows.Input;
 using Newtonsoft.Json;
 
 namespace HON.Windows.ViewModels
@@ -24,27 +24,31 @@ namespace HON.Windows.ViewModels
     public class SessionManager : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
+        public Action? onPanelAction { get; set; }
 
         private bool _isRunning;
-        public bool IsRunning { get => _isRunning; set { _isRunning = value; OnPropertyChanged(); } }
+        public bool IsRunning { get => _isRunning; set { _isRunning = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsIdle)); OnPropertyChanged(nameof(IsRunningState)); } }
 
         private bool _isPaused;
-        public bool IsPaused { get => _isPaused; set { _isPaused = value; OnPropertyChanged(); } }
+        public bool IsPaused { get => _isPaused; set { _isPaused = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsIdle)); OnPropertyChanged(nameof(IsRunningState)); } }
 
         private bool _isCompleted;
-        public bool IsCompleted { get => _isCompleted; set { _isCompleted = value; OnPropertyChanged(); } }
+        public bool IsCompleted { get => _isCompleted; set { _isCompleted = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsIdle)); OnPropertyChanged(nameof(IsRunningState)); } }
 
         private bool _isNaming;
-        public bool IsNaming { get => _isNaming; set { _isNaming = value; OnPropertyChanged(); } }
+        public bool IsNaming { get => _isNaming; set { _isNaming = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsIdle)); OnPropertyChanged(nameof(IsRunningState)); } }
 
         private bool _isWellnessBreak;
-        public bool IsWellnessBreak { get => _isWellnessBreak; set { _isWellnessBreak = value; OnPropertyChanged(); } }
+        public bool IsWellnessBreak { get => _isWellnessBreak; set { _isWellnessBreak = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsIdle)); OnPropertyChanged(nameof(IsRunningState)); } }
 
         private bool _isIdleConfirmation;
-        public bool IsIdleConfirmation { get => _isIdleConfirmation; set { _isIdleConfirmation = value; OnPropertyChanged(); } }
+        public bool IsIdleConfirmation { get => _isIdleConfirmation; set { _isIdleConfirmation = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsIdle)); OnPropertyChanged(nameof(IsRunningState)); } }
 
         private bool _isAreYouWorkingPrompt;
-        public bool IsAreYouWorkingPrompt { get => _isAreYouWorkingPrompt; set { _isAreYouWorkingPrompt = value; OnPropertyChanged(); } }
+        public bool IsAreYouWorkingPrompt { get => _isAreYouWorkingPrompt; set { _isAreYouWorkingPrompt = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsIdle)); OnPropertyChanged(nameof(IsRunningState)); } }
+
+        public bool IsIdle => !IsRunning && !IsPaused && !IsNaming && !IsCompleted && !IsWellnessBreak && !IsIdleConfirmation && !IsAreYouWorkingPrompt;
+        public bool IsRunningState => IsRunning && !IsPaused && !IsNaming && !IsCompleted && !IsWellnessBreak && !IsIdleConfirmation && !IsAreYouWorkingPrompt;
 
         private int _elapsedSeconds;
         public int ElapsedSeconds { get => _elapsedSeconds; set { _elapsedSeconds = value; OnPropertyChanged(); OnPropertyChanged(nameof(TimerDisplay)); } }
@@ -53,7 +57,8 @@ namespace HON.Windows.ViewModels
         public int WellnessSeconds { get => _wellnessSeconds; set { _wellnessSeconds = value; OnPropertyChanged(); } }
 
         private string _taskLabel = "";
-        public string TaskLabel { get => _taskLabel; set { _taskLabel = value; OnPropertyChanged(); } }
+        public string TaskLabel { get => _taskLabel; set { _taskLabel = value; OnPropertyChanged(); OnPropertyChanged(nameof(TaskLabelDisplay)); } }
+        public string TaskLabelDisplay => string.IsNullOrWhiteSpace(TaskLabel) ? "Unlabeled" : TaskLabel;
 
         private string _selectedCategory = "Personal";
         public string SelectedCategory { get => _selectedCategory; set { _selectedCategory = value; OnPropertyChanged(); } }
@@ -66,9 +71,21 @@ namespace HON.Windows.ViewModels
         private bool _wasIdle = false;
         private const double IdleThreshold = 300.0; // 5 mins
 
-        private Timer? _timer;
-        private Timer? _backgroundTimer;
+        private System.Timers.Timer? _timer;
+        private System.Timers.Timer? _backgroundTimer;
         private readonly string _sessionsPath;
+
+        public ICommand InitiateStartCommand => new RelayCommand(InitiateStart);
+        public ICommand StartCommand => new RelayCommand(() => Start());
+        public ICommand CancelNamingCommand => new RelayCommand(() => IsNaming = false);
+        public ICommand StopCommand => new RelayCommand(Stop);
+        public ICommand SaveSessionCommand => new RelayCommand(SaveSession);
+        public ICommand DiscardSessionCommand => new RelayCommand(DiscardSession);
+        public ICommand ResumeSessionCommand => new RelayCommand(ResumeSession);
+        public ICommand StartManualBreakCommand => new RelayCommand(StartManualBreak);
+        public ICommand PauseForWellnessCommand => new RelayCommand(PauseForWellness);
+        public ICommand ContinueWorkingCommand => new RelayCommand(ContinueWorking);
+        public ICommand DismissAreYouWorkingCommand => new RelayCommand(DismissAreYouWorking);
 
         public SessionManager()
         {
@@ -83,7 +100,7 @@ namespace HON.Windows.ViewModels
 
         private void StartBackgroundMonitoring()
         {
-            _backgroundTimer = new Timer(5000); // 5s check
+            _backgroundTimer = new System.Timers.Timer(5000); // 5s check
             _backgroundTimer.Elapsed += (s, e) => CheckSystemState();
             _backgroundTimer.Start();
         }
@@ -116,7 +133,7 @@ namespace HON.Windows.ViewModels
             {
                 if (idleSeconds > IdleThreshold && !IsIdleConfirmation)
                 {
-                    App.Current.Dispatcher.Invoke(TriggerIdleConfirmation);
+                    System.Windows.Application.Current.Dispatcher.Invoke(TriggerIdleConfirmation);
                 }
             }
             else if (!IsRunning && !IsAreYouWorkingPrompt && !IsNaming)
@@ -139,7 +156,7 @@ namespace HON.Windows.ViewModels
                     _activeSecondsSinceLastSession += 5;
                     if (_activeSecondsSinceLastSession >= 120)
                     {
-                        App.Current.Dispatcher.Invoke(TriggerAreYouWorkingPrompt);
+                        System.Windows.Application.Current.Dispatcher.Invoke(TriggerAreYouWorkingPrompt);
                     }
                 }
                 else
@@ -181,12 +198,12 @@ namespace HON.Windows.ViewModels
             _wasIdle = false;
 
             _timer?.Stop();
-            _timer = new Timer(1000);
+            _timer = new System.Timers.Timer(1000);
             _timer.Elapsed += (s, e) => {
                 if (IsRunning && !IsPaused) {
                     ElapsedSeconds++;
                     WellnessSeconds++;
-                    if (WellnessSeconds >= 1200) App.Current.Dispatcher.Invoke(TriggerWellnessBreak);
+                    if (WellnessSeconds >= 1200) System.Windows.Application.Current.Dispatcher.Invoke(TriggerWellnessBreak);
                 }
             };
             _timer.Start();
@@ -195,13 +212,13 @@ namespace HON.Windows.ViewModels
         public void PauseForWellness() { IsPaused = true; IsWellnessBreak = false; WellnessSeconds = 0; }
         public void ContinueWorking() { IsWellnessBreak = false; WellnessSeconds = 0; }
         public void StartManualBreak() { IsPaused = true; IsWellnessBreak = false; WellnessSeconds = 0; }
-        public void TriggerWellnessBreak() { IsWellnessBreak = true; }
-        public void TriggerIdleConfirmation() { IsIdleConfirmation = true; IsPaused = true; }
-        public void TriggerAreYouWorkingPrompt() { IsAreYouWorkingPrompt = true; }
+        public void TriggerWellnessBreak() { IsWellnessBreak = true; onPanelAction?.Invoke(); }
+        public void TriggerIdleConfirmation() { IsIdleConfirmation = true; IsPaused = true; onPanelAction?.Invoke(); }
+        public void TriggerAreYouWorkingPrompt() { IsAreYouWorkingPrompt = true; onPanelAction?.Invoke(); }
         public void DismissAreYouWorking() { IsAreYouWorkingPrompt = false; _activeSecondsSinceLastSession = 0; }
         public void ResumeSession() { IsPaused = false; IsWellnessBreak = false; IsIdleConfirmation = false; }
         
-        public void Stop() { IsRunning = false; IsPaused = false; IsCompleted = true; IsWellnessBreak = false; IsIdleConfirmation = false; _timer?.Stop(); }
+        public void Stop() { IsRunning = false; IsPaused = false; IsCompleted = true; IsWellnessBreak = false; IsIdleConfirmation = false; _timer?.Stop(); onPanelAction?.Invoke(); }
 
         public void SaveSession()
         {
@@ -251,5 +268,14 @@ namespace HON.Windows.ViewModels
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
+    }
+
+    public class RelayCommand : ICommand
+    {
+        private readonly Action _execute;
+        public RelayCommand(Action execute) => _execute = execute;
+        public bool CanExecute(object? parameter) => true;
+        public void Execute(object? parameter) => _execute();
+        public event EventHandler? CanExecuteChanged;
     }
 }
