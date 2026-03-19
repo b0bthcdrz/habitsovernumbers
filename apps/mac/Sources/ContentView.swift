@@ -10,7 +10,9 @@ struct ContentView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            if manager.isWellnessBreak {
+            if manager.isAreYouWorkingPrompt {
+                areYouWorkingView
+            } else if manager.isWellnessBreak {
                 wellnessView
             } else if manager.isIdleConfirmation {
                 idleConfirmationView
@@ -365,6 +367,40 @@ struct ContentView: View {
                     .cornerRadius(8)
             }
             .buttonStyle(.plain)
+        }
+        .padding(.vertical, 20)
+    }
+    
+    var areYouWorkingView: some View {
+        VStack(spacing: 20) {
+            Text("Are you working?")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(.black)
+            
+            VStack(spacing: 12) {
+                Button(action: {
+                    manager.initiateStart()
+                }) {
+                    Text("Yes, log my time")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.black)
+                        .cornerRadius(8)
+                }
+                .buttonStyle(.plain)
+                
+                Button(action: {
+                    manager.dismissAreYouWorking()
+                }) {
+                    Text("Don't log my session")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(Color(hexString: "#aaaaaa"))
+                        .underline()
+                }
+                .buttonStyle(.plain)
+            }
         }
         .padding(.vertical, 20)
     }

@@ -21,6 +21,7 @@ class SessionManager: ObservableObject {
     @Published var isNaming = false
     @Published var isWellnessBreak = false
     @Published var isIdleConfirmation = false
+    @Published var isAreYouWorkingPrompt = false
     @Published var elapsedSeconds = 0
     @Published var wellnessSeconds = 0
     @Published var taskLabel = ""
@@ -30,6 +31,7 @@ class SessionManager: ObservableObject {
     
     // Active Recall properties
     @Published var detectedStartTime: Date?
+    private var activeSecondsSinceLastSession: Int = 0
     private var idleCheckTimer: Timer?
     private var wasIdle = false
     private let idleThreshold: TimeInterval = 300 // 5 minutes
@@ -102,16 +104,40 @@ class SessionManager: ObservableObject {
                 print("Triggering idle confirmation: idle for \(Int(secondsSinceLastEvent))s")
                 triggerIdleConfirmation()
             }
-        } else if !isRunning {
+        } else if !isRunning && !isAreYouWorkingPrompt && !isNaming {
             // While idle: Active Recall logic
             if isReasonableValue && secondsSinceLastEvent > idleThreshold {
                 wasIdle = true
                 detectedStartTime = nil
+                activeSecondsSinceLastSession = 0
             } else if wasIdle && secondsSinceLastEvent < 5 {
                 detectedStartTime = Date().addingTimeInterval(-secondsSinceLastEvent)
                 wasIdle = false
             }
+            
+            // If user is active and no session is running, track active time
+            if isReasonableValue && secondsSinceLastEvent < 5 {
+                activeSecondsSinceLastSession += 5 // We check every 5 seconds
+                
+                // If user has been active for 2 minutes (120 seconds)
+                if activeSecondsSinceLastSession >= 120 {
+                    triggerAreYouWorkingPrompt()
+                }
+            } else {
+                // If user stops being active, reset the counter
+                activeSecondsSinceLastSession = 0
+            }
         }
+    }
+    
+    private func triggerAreYouWorkingPrompt() {
+        isAreYouWorkingPrompt = true
+        onPanelAction?()
+    }
+    
+    func dismissAreYouWorking() {
+        isAreYouWorkingPrompt = false
+        activeSecondsSinceLastSession = 0
     }
     
     // MARK: - Session Lifecycle
@@ -123,6 +149,8 @@ class SessionManager: ObservableObject {
         isWellnessBreak = false
         isPaused = false
         isIdleConfirmation = false
+        isAreYouWorkingPrompt = false
+        activeSecondsSinceLastSession = 0
     }
     
     func start(fromDetected: Bool = false) {
@@ -134,6 +162,8 @@ class SessionManager: ObservableObject {
         isCompleted = false
         isWellnessBreak = false
         isIdleConfirmation = false
+        isAreYouWorkingPrompt = false
+        activeSecondsSinceLastSession = 0
         
         elapsedSeconds = Int(Date().timeIntervalSince(actualStart))
         wellnessSeconds = elapsedSeconds
