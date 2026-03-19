@@ -1,0 +1,65 @@
+<Window x:Class="HON.Windows.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2000/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2000/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HON.Windows.Views"
+        mc:Ignorable="d"
+        Title="HON" Height="400" Width="260"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Topmost="True" ShowInTaskbar="False" WindowStartupLocation="Manual">
+    
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <local:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
+    </Window.Resources>
+
+    <Border Background="White" CornerRadius="12" BorderThickness="1" BorderBrush="#DDD7CC">
+        <Grid Padding="16">
+            <StackPanel Spacing="0">
+                <!-- Content States based on SessionManager properties -->
+                
+                <!-- ARE YOU WORKING? PROMPT -->
+                <StackPanel Visibility="{Binding IsAreYouWorkingPrompt, Converter={StaticResource BoolToVis}}" VerticalAlignment="Center" Margin="0,20">
+                    <TextBlock Text="Are you working?" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
+                    <Button Content="Yes, log my time" Margin="0,20,0,0" Style="{StaticResource PrimaryButton}" Command="{Binding InitiateStartCommand}" />
+                    <Button Content="Don't log my session" Style="{StaticResource LinkButton}" Command="{Binding DismissAreYouWorkingCommand}" />
+                </StackPanel>
+
+                <!-- WELLNESS BREAK -->
+                <StackPanel Visibility="{Binding IsWellnessBreak, Converter={StaticResource BoolToVis}}" VerticalAlignment="Center" Margin="0,20">
+                    <TextBlock Text="Wellness Break" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
+                    <TextBlock Text="Stand up, relax, breathe, drink, and walk to unwind." FontSize="14" TextWrapping="Wrap" TextAlignment="Center" Margin="0,10" Foreground="#6B6456" />
+                    <Button Content="Pause &amp; Relax" Style="{StaticResource PrimaryButton}" Command="{Binding PauseForWellnessCommand}" />
+                    <Button Content="Continue working" Style="{StaticResource LinkButton}" Command="{Binding ContinueWorkingCommand}" Margin="0,12,0,0" />
+                </StackPanel>
+
+                <!-- IDLE STATE -->
+                <StackPanel Visibility="{Binding IsIdle, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="0:00:00" FontSize="36" FontWeight="Medium" FontFamily="Consolas" Foreground="#aaaaaa" HorizontalAlignment="Center" Margin="0,0,0,12" />
+                    <Button Content="Start Focus Session" Style="{StaticResource PrimaryButton}" Command="{Binding InitiateStartCommand}" />
+                </StackPanel>
+
+                <!-- ACTIVE STATE -->
+                <StackPanel Visibility="{Binding IsRunningState, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="{Binding TaskLabelDisplay}" FontSize="12" FontWeight="Medium" HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding SelectedCategory}" FontSize="10" Foreground="#aaaaaa" HorizontalAlignment="Center" Margin="0,0,0,8" />
+                    <TextBlock Text="{Binding TimerDisplay}" FontSize="36" FontWeight="Medium" FontFamily="Consolas" HorizontalAlignment="Center" Margin="0,0,0,12" />
+                    <Button Content="Take a Break" Style="{StaticResource PrimaryButton}" Command="{Binding StartManualBreakCommand}" />
+                    <Button Content="Stop Session" Style="{StaticResource LinkButton}" Command="{Binding StopCommand}" Margin="0,8,0,0" />
+                </StackPanel>
+
+                <!-- NAMING STATE -->
+                <StackPanel Visibility="{Binding IsNaming, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="What are you working on?" FontSize="14" FontWeight="Medium" HorizontalAlignment="Center" Margin="0,0,0,12" />
+                    <TextBox Text="{Binding TaskLabel, UpdateSourceTrigger=PropertyChanged}" FontSize="13" BorderThickness="0,0,0,1" BorderBrush="#d0d0d0" Margin="0,0,0,12" Padding="0,0,0,6" />
+                    <Button Content="Start Now" Style="{StaticResource PrimaryButton}" Command="{Binding StartCommand}" />
+                    <Button Content="Cancel" Style="{StaticResource LinkButton}" Command="{Binding CancelNamingCommand}" Margin="0,8,0,0" />
+                </StackPanel>
+                
+                <!-- QUIT Button (Bottom) -->
+                <Button Content="Quit HON" Style="{StaticResource LinkButton}" VerticalAlignment="Bottom" Margin="0,20,0,0" Click="Quit_Click" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
